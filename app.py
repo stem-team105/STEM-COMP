@@ -4,7 +4,7 @@ try:
     from PySide6.QtWidgets import QApplication
     from studio import Studio, LIGHT
 except ImportError:
-    print("Desktop dependencies are missing. Run Start-Game-Day.bat first.")
+    print("Desktop dependencies are missing. Double-click Lamatna.bat first.")
     print("For local AI, also run Install-Local-AI.bat.")
     sys.exit(1)
 

@@ -57,4 +57,10 @@ class StudioTests(unittest.TestCase):
     def test_family_plan_is_saved(self):
         self.w.plan_title.setText('Call grandparents');self.w.add_plan();self.assertEqual(len(self.w.family_store.plans()),1)
 
+    def test_sport_flow_starts_with_football_and_prioritizes_scores(self):
+        self.w.game.setCurrentText('Falcon Freeze');self.w.football_button.click()
+        self.assertEqual(self.w.game.currentText(),'Football');self.assertEqual(self.w.stack.currentIndex(),1)
+        self.assertEqual([b.text() for b in self.w.nav],['Home','Teams','Play','Results'])
+        self.assertTrue(self.w.sport_plans.isHidden());self.assertTrue(self.w.sport_notes.isHidden())
+
 if __name__=='__main__':unittest.main()

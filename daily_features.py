@@ -7,13 +7,14 @@ from recommendation import FamilyRecommender
 
 class DailyFeatures:
     def init_family(self,directory):
-        self.family_store=FamilyStore(directory/'family.sqlite3');self.match_context=['calm','indoors','5']
+        self.family_store=FamilyStore(directory/'family.sqlite3');self.match_context=['active','outdoors','10']
     def daily_card(self):
-        w,c=card('Today, together','How much time and energy do you have? We will suggest a game.')
+        w,c=card('Find your family’s next game','Choose your energy, play space and available time.')
         row=QHBoxLayout();self.energy=QComboBox();self.space=QComboBox();self.minutes=QComboBox()
         for text,data in [('A quiet moment','calm'),('Feeling playful','playful'),('Ready to move','active')]:self.energy.addItem(text,data)
         for text,data in [('At home / indoors','indoors'),('Outside together','outdoors')]:self.space.addItem(text,data)
         for value in ['5','10','20']:self.minutes.addItem(value+' minutes',value)
+        self.energy.setCurrentIndex(2);self.space.setCurrentIndex(1);self.minutes.setCurrentIndex(1)
         for control in [self.energy,self.space,self.minutes]:row.addWidget(control,1);control.currentIndexChanged.connect(self.update_suggestion)
         c.addLayout(row);self.suggestion=label('','heading');c.addWidget(self.suggestion);row=QHBoxLayout();row.addWidget(button('Try today’s suggestion',self.try_suggestion,True));row.addStretch();c.addLayout(row);self.update_suggestion();return w
     def checkin_context(self):return [self.energy.currentData(),self.space.currentData(),self.minutes.currentData()]
@@ -22,7 +23,7 @@ class DailyFeatures:
         self.suggested_game=FamilyRecommender(self.family_store.feedback()).suggest(self.checkin_context());self.suggestion.setText(self.suggested_game)
     def try_suggestion(self):self.select_game(self.suggested_game)
     def planner_card(self):
-        w,c=card('Our next gathering','Add a small plan and tick it off when it is done.');row=QHBoxLayout();self.plan_title=QLineEdit();self.plan_title.setPlaceholderText('Dinner, a game night, or a call with grandparents…');row.addWidget(self.plan_title,1);self.plan_date=QDateEdit(QDate.currentDate());self.plan_date.setCalendarPopup(True);self.plan_date.setDisplayFormat('dd MMM yyyy');row.addWidget(self.plan_date);row.addWidget(button('Add plan',self.add_plan,True));c.addLayout(row);self.plans_list=QListWidget();self.plans_list.setMinimumHeight(100);self.plans_list.setMaximumHeight(155);self.plans_list.itemChanged.connect(self.plan_changed);c.addWidget(self.plans_list);self.refresh_plans();return w
+        w,c=card('Our next sports day','Plan your next match or family activity.');row=QHBoxLayout();self.plan_title=QLineEdit();self.plan_title.setPlaceholderText('Friday football, a family relay, or a park game…');row.addWidget(self.plan_title,1);self.plan_date=QDateEdit(QDate.currentDate());self.plan_date.setCalendarPopup(True);self.plan_date.setDisplayFormat('dd MMM yyyy');row.addWidget(self.plan_date);row.addWidget(button('Add plan',self.add_plan,True));c.addLayout(row);self.plans_list=QListWidget();self.plans_list.setMinimumHeight(100);self.plans_list.setMaximumHeight(155);self.plans_list.itemChanged.connect(self.plan_changed);c.addWidget(self.plans_list);self.refresh_plans();return w
     def add_plan(self):
         try:self.family_store.add_plan(self.plan_title.text(),self.plan_date.date().toString('yyyy-MM-dd'));self.plan_title.clear();self.refresh_plans();self.status.setText('Your family plan is saved.')
         except ValueError as e:self.error(str(e))
@@ -34,7 +35,7 @@ class DailyFeatures:
     def plan_changed(self,item):
         if item.data(Qt.UserRole) is not None:self.family_store.complete(item.data(Qt.UserRole),item.checkState()==Qt.Checked)
     def journal_card(self):
-        w,c=card('Our memories','A sentence or two can keep a whole day alive.');self.memory_title=QLineEdit();self.memory_title.setPlaceholderText('Give this memory a name');c.addWidget(self.memory_title);self.memory_body=QTextEdit();self.memory_body.setPlaceholderText('What made today special? Arabic and English notes are welcome.');self.memory_body.setMaximumHeight(90);c.addWidget(self.memory_body);row=QHBoxLayout();row.addWidget(button('Save memory',self.save_memory,True));row.addStretch();c.addLayout(row);self.memories_list=QListWidget();self.memories_list.setMinimumHeight(85);self.memories_list.setMaximumHeight(130);self.memories_list.itemClicked.connect(self.show_memory);c.addWidget(self.memories_list);self.memory_preview=label('','muted');self.memory_preview.setMaximumHeight(180);self.memory_preview.setTextFormat(Qt.PlainText);c.addWidget(self.memory_preview);self.refresh_memories();return w
+        w,c=card('Sports-day notes','Keep a highlight or something to improve next match.');self.memory_title=QLineEdit();self.memory_title.setPlaceholderText('Give this match highlight a name');c.addWidget(self.memory_title);self.memory_body=QTextEdit();self.memory_body.setPlaceholderText('A great goal, teamwork, or a lesson for next time. Arabic and English are welcome.');self.memory_body.setMaximumHeight(90);c.addWidget(self.memory_body);row=QHBoxLayout();row.addWidget(button('Save memory',self.save_memory,True));row.addStretch();c.addLayout(row);self.memories_list=QListWidget();self.memories_list.setMinimumHeight(85);self.memories_list.setMaximumHeight(130);self.memories_list.itemClicked.connect(self.show_memory);c.addWidget(self.memories_list);self.memory_preview=label('','muted');self.memory_preview.setMaximumHeight(180);self.memory_preview.setTextFormat(Qt.PlainText);c.addWidget(self.memory_preview);self.refresh_memories();return w
     def save_memory(self):
         try:self.family_store.add_memory(self.memory_title.text(),self.memory_body.toPlainText());self.memory_title.clear();self.memory_body.clear();self.refresh_memories();self.status.setText('A little memory, safely saved.')
         except ValueError as e:self.error(str(e))

@@ -1,58 +1,38 @@
-# Real gameplay acceptance tests
+# Lamatna verification
 
-Status: **pending** until students execute with an enabled API key and real recordings.
-Do not replace pending with passed without checking the actual result.
+45 automated checks pass in the current revision. Synthetic fixtures check scoring, validation, HMAC signatures, duplicate rejection, explicit local review, turn progression, autosave/resume, game guidance, timer colours, favourites, main Arabic labels, planner/journal persistence, recommendation behaviour, isolated launcher setup/recovery and reuse without network installation. They do not measure gameplay-model accuracy.
+
+The Qt interface was launched offscreen on Linux. Home, teams and results were inspected; plans and notes are collapsed, football leads the home page, and scores lead Results. English/Arabic and light/dark rendering have been inspected. No Windows launcher, desktop-shortcut, camera or microphone pass is claimed from this environment.
+
+## Student acceptance checks
 
 | Test | Expected | Actual / status |
 |---|---|---|
-| Launch on Windows with `py app.py` | All three tabs usable | Pending |
-| Football: one visible goal | Correct team +1, timestamp and reason | Pending |
-| Football: shot misses | No goal awarded | Pending |
-| Football: two numbered players exchange possession | Plausible intervals, correct team totals and MVP | Pending |
-| Football: obscured goal or ball | Uncertainty/limitation, no invented goal | Pending |
-| Majlis Delivery: one delivery and one drop | +1 net | Pending |
-| Falcon Freeze: successful freeze then movement | 0 net | Pending |
-| Dune Steps: six correct targets | +6 | Pending |
-| Family Story Relay: three valid distinct word sentences | +3 | Pending |
-| Unclear speech / wrong words | No unsupported story points | Pending |
-| Repeat same clip | Cannot apply twice in same game | Pending |
-| Edit exported signed report | Import rejected | Pending |
-| No API key / network / quota | Useful error; scores unchanged | Pending |
-| Full round and tied game | Next turns, final results, extra round | Pending |
-| Export and inspect results JSON | Scores plus evidence retained | Pending |
+| Extract ZIP, double-click Lamatna.bat | Setup window, interface installation if needed, app opens | Pending on Windows |
+| Existing installed app | No repeated package/model download | Automated recovery/reuse logic passed; Windows pending |
+| Desktop shortcut | Lamatna opens from its actual folder, including paths with spaces | Pending on Windows |
+| Settings → Set up offline game support | Missing packages install, model files download, app reopens | Pending on team connection |
+| Camera + microphone recording | Playable clip with audible instructions | Pending |
+| Football: one visible goal | Correct candidate team +1, timestamp and reason, host review required | Pending real model/footage |
+| Football: shot misses/obscured ball | No invented goal; uncertainty stated | Pending |
+| Football: players exchange possession | Plausible intervals and correct identity/team totals/MVP | Pending |
+| Calibration | Correct player anchors, scoring-team goal rectangles and markers | Pending |
+| Majlis Delivery: delivery + drop | +1 net after host checks tray support and drop | Pending |
+| Falcon Freeze: success + movement | 0 net with clear audible English cues | Pending |
+| Dune Steps: six correct markers | +6 | Pending |
+| Family Story Relay | Up to +3 for distinct coherent assigned-word sentences, checked by host | Pending |
+| Review unchecked | Local suggestions cannot change scores | Automated synthetic check passed |
+| Duplicate clip / altered signature | Duplicate scoring / modified evidence rejected | Automated synthetic checks passed |
+| Finish and restart | Saved match restores points, roster, turn and history | Automated synthetic check passed; Windows pending |
+| Family sports flow | Home → Teams → Play → Results, all five games available | Automated/offscreen checks passed; Windows pending |
+| Arabic switch | Main labels and RTL change, logo remains visible | Automated/offscreen checks passed; full translation not claimed |
+| Peak RAM and processing time | Record actual device/profile/clip/duration/peak-memory observations | Pending real hardware |
+| Public prototype and video links | Play/view/download signed out | Pending before submission |
 
-## Honest limitations
+## Limits to explain
 
-- Upload-only capture workflow; use a phone or Windows Camera to record audio and video.
-- Cloud inference requires an enabled Gemini account, quota, internet, and a supported video model.
-- Multimodal estimates can miss rapid ball movement or confuse identities. No precision tracking claim.
-- Local HMAC prevents accidental/unauthorised editing without the secret, not a malicious machine owner.
-- Match state is not automatically saved. Export before closing.
-- The timer is host guidance; the host must stop recording and obey the game time limit.
+Local vision/speech integrates pretrained models, not models trained by the team. Its heuristic event estimates are experimental; calibrated confidence or autonomous referee accuracy is not claimed. Verify goal crossing, player identity, tray support/drops and sentence coherence against the actual video. The small recommendation model uses disclosed synthetic seed examples and explicit local feedback.
 
-## Modern desktop revision
+The host must stop recording; the timer does not automatically cut a clip. Optional cloud review needs the family's own key, internet and quota. Local review needs the one-time package/model installation but no API key afterward. HMAC detects changes relative to one installation's key; it does not prevent forgery by someone who controls that computer/key.
 
-20 automated checks passed, including six offscreen Qt behaviour checks. These do not replace Windows hardware/footage tests.
-
-| Additional acceptance test | Expected | Actual / status |
-|---|---|---|
-| Run Start-Game-Day.bat in fresh extracted folder | Creates venv, installs UI and launches | Pending on Windows |
-| Install-Local-AI.bat | CPU packages + all three pretrained models ready | Pending on team connection |
-| Camera preview and recording | MP4 recording includes microphone audio | Pending |
-| First-frame calibration | Clicks save correct normalized player/goal/marker positions | Pending |
-| Local football inference | Candidate goals/possession shown for review | Pending real model/footage |
-| Local approval | No score until host confirms; human_reviewed recorded | Automated synthetic check passed |
-| Restart and resume | Session scores/history/round restored | Pending Windows user test |
-| Dark/light themes and small window | Readable, scrollable controls | Visually inspected offscreen; Windows pending |
-
-## Family-first RALLY revision
-
-28 automated checks passed. New checks cover pre-play guidance, no sidebar/four-tab navigation, favourites persistence, countdown colour changes, local-mode default, saved-match restoration, streaming hashes, efficiency profiles and speech-only execution without a vision-model import.
-
-Light and dark layouts were visually inspected at 1240×900 and 850×720. These are offscreen Qt checks, not Windows hardware tests. Windows camera/audio recording, installer/updater execution, peak RAM and real model accuracy still need acceptance tests on the team's laptop.
-
-## Lamatna daily-family update
-
-40 automated checks pass, including persistent plans, bilingual memory text, blank/invalid input rejection, feedback deduplication, recommendation adaptation and Arabic label switching without losing the logo. Offscreen GUI smoke checks confirmed adding a plan, saving a memory, switching English/Arabic and starting a game.
-
-New logo alpha transparency is verified. Gameplay model accuracy, camera/audio on Windows and peak RAM still require the team's real-device tests. UI localization covers main labels and RTL layout; detailed game rules, some secondary controls and recognition evidence remain English.
+Use real student footage and observed results in the submission. Keep untested rows pending until actually checked.

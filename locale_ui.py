@@ -2,6 +2,16 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel,QAbstractButton
 TEXT={
+'Teams':'الفرق','Results':'النتائج','Family sport, together.':'رياضة تجمع العائلة.',
+'Five family games. Clear rules, timed rounds and results you can review.':'خمس ألعاب عائلية، وقواعد واضحة، وجولات محددة الوقت، ونتائج يمكنكم مراجعتها.',
+'YOUR FAMILY GAME DAY':'يومكم الرياضي العائلي','A little team spirit.\nA lot of family time.':'روح الفريق.\nولحظات تجمع العائلة.',
+'Start a football match, record the action and review goals, possession and your MVP.':'ابدأوا مباراة كرة قدم، وسجّلوا اللعب، وراجعوا الأهداف والاستحواذ وأفضل لاعب.',
+'Play football  →':'لنلعب كرة القدم  ←','Your game. Your teams.':'لعبتكم. فرقكم.',
+'Choose a game, add your family and check the equipment before playing.':'اختاروا لعبة، وأضيفوا أفراد العائلة، وتأكدوا من الأدوات قبل البدء.',
+'Find your family’s next game':'اختاروا لعبة العائلة القادمة','Choose your energy, play space and available time.':'حددوا نشاطكم ومكان اللعب والوقت المتاح.',
+'Every round counts.':'لكل جولة قيمتها.','Review your scoreboard, player MVP, replays and saved family matches.':'راجعوا النتائج وأفضل لاعب والتسجيلات والمباريات المحفوظة.',
+'Plan another sports day':'خططوا ليوم رياضي آخر','Our next sports day':'يومنا الرياضي القادم','Plan your next match or family activity.':'خططوا للمباراة أو النشاط العائلي القادم.',
+'Add a sports-day note':'أضيفوا ملاحظة عن يومكم الرياضي','Sports-day notes':'ملاحظات اليوم الرياضي','Keep a highlight or something to improve next match.':'احتفظوا بلقطة جميلة أو فكرة للتحسين في المباراة القادمة.',
 'Home':'الرئيسية','Family':'العائلة','Play':'نلعب','Moments':'ذكرياتنا','Settings':'الإعدادات','Appearance':'المظهر',
 'Closer, in the little moments.':'لحظات صغيرة، تجمعنا أكثر.','Family time, shared stories and a little friendly competition.':'وقت للعائلة، وحكايات مشتركة، ومنافسة ودّية.',
 'OUR TIME, TOGETHER':'لمّتنا، كل يوم','Rooted in family.\nMade for your everyday.':'من عائلتنا.\nولأجمل أوقاتنا.',

@@ -1,31 +1,28 @@
 # Lamatna — Team 105
 
-A family-first desktop game host built for the Advanced (Champions) track of the 2026 COE STEM Programming with AI Competition.
+A family-sports desktop game host built for the Advanced (Champions) track of the 2026 COE STEM Programming with AI Competition.
 
-## Start on Windows
+## Open on Windows — one double-click
 
-1. On GitHub choose **Code → Download ZIP**, then **Extract all**. Open the inner folder containing this README and the `.bat` files.
-2. Double-click **Start-Game-Day.bat**. It creates an isolated `.venv`, installs PySide6 the first time, and opens the modern app.
-3. For **built-in local AI**, run **Install-Local-AI.bat** once while connected to the internet. It installs CPU PyTorch, Ultralytics, OpenCV, Vosk and FFmpeg and downloads pretrained vision and English speech models. This can take several minutes, depends on internet speed, and requires disk space for the packages.
-4. Reopen **Start-Game-Day.bat**. Select **Local AI** in Match setup. No API key is needed for local mode after setup.
+1. Download the GitHub ZIP, choose **Extract all**, and open the folder containing `app.py`.
+2. Double-click **Lamatna.bat**. A small setup window prepares the interface if needed, then opens the app. No PowerShell commands or VS Code are needed.
+3. Next time, use the **Lamatna** desktop shortcut created by the launcher. Keep the extracted application folder in place.
 
-Python 3.11+ (64-bit) with the `py` launcher is required. This is a source distribution, not a packaged Windows EXE. Keep the console open if an error appears.
+Your existing `.venv`, model downloads and saved matches are reused. `Start-Game-Day.bat` opens the same launcher for compatibility. Initial interface setup needs internet; later launches skip installation when the interface is already available. Errors appear in a window and `.local/startup.log` rather than disappearing with the console.
 
-VS Code terminal after installation:
+For local video/speech review, choose **Settings → Set up offline game support** once. If packages are missing, the app closes, a setup window installs CPU packages and pretrained model files, and Lamatna reopens. This larger download may take several minutes and needs internet/disk space. No API key is needed after local setup. `Install-Local-AI.bat` remains an alternative.
 
-```powershell
-.\.venv\Scripts\python.exe app.py
-```
+Python 3.11–3.13 (64-bit, with Tkinter) is recommended. The launcher detects the team's installed Python automatically. This is a Python application with a one-click launcher, not a standalone Windows EXE. Actual Windows launcher, shortcut and hardware acceptance tests remain pending.
 
-The original minimal Tkinter interface remains available as `py legacy_app.py`.
+Developers can still run `.\.venv\Scripts\python.exe app.py` from the app folder.
 
-## Daily family features
+## Family sports first
 
 Lamatna (لمّتنا) follows Sila's ivory, palm-green and brass visual direction with an Emirati courtyard illustration and a new transparent palm-and-home logo. The app and window icon use the new artwork in `assets/lamatna-mark.svg` and `.png`. This is Lamatna's own implementation; no NoteMind application code or assets are imported.
 
 - **Today, together:** select energy, indoor/outdoor space and available time for a game recommendation.
-- **Our next gathering:** add dated family plans and tick them off when done. These are local plans, not background notification/reminder services.
-- **Our memories:** save Arabic/English text notes and revisit them in Moments.
+- **Plan another sports day:** an optional expandable section below game setup saves dated match/activity plans. These are local plans, not background reminders.
+- **Sports-day notes:** an optional expandable section after the scoreboard/replays saves Arabic/English match highlights and lessons.
 - **We enjoyed this:** after a completed game, explicit feedback adapts future game suggestions.
 - **Arabic / English:** a header control switches main labels and mirrors layout for Arabic. Detailed rules, some secondary controls and model evidence remain English; English is the supported speech-recognition language.
 
@@ -33,9 +30,9 @@ Planner, journal and feedback are saved in `.local/family.sqlite3`. Game session
 
 The new recommendation model is a categorical Naive Bayes classifier fitted on 20 disclosed synthetic seed examples plus explicit local family feedback. It is small and runs entirely in the Python standard library. It is separate from the upstream-pretrained gameplay vision and speech models. Read `MODEL-CARD.md` for data, limitations and training attribution.
 
-## Everyday family flow
+## Family sports flow
 
-The main interface uses plain family language. It opens on Home with a quick game suggestion, colourful game cards, favourites and game filters. Select a game to see a pre-play suggestion, equipment, safety tip and a blue duration badge. Family names and teams are edited in a simple table. The Play page contains a timer, camera and results review. Moments contains scores, replay and saved games. Settings lives in the top bar.
+The home page leads with football, then a family game suggestion, game cards, favourites and filters. The four bottom tabs are **Home → Teams → Play → Results**. Select a game to see equipment, a safety tip and a coloured duration badge before playing. Enter the family roster and teams, then record/upload a turn. Results leads with the scoreboard, possession MVP, replays and saved matches. Plans and notes are optional, collapsed extras. All five challenge games remain available, including Story Relay; it is a storytelling game, not a physical sport.
 
 The sidebar is removed. Four bottom tabs provide tablet-style navigation on a desktop. Light/dark appearance and reduced animation are supported. Timer digits turn amber at 15 seconds and red at five, with text and a progress bar alongside the colour.
 
@@ -43,11 +40,11 @@ Local processing is the default. The family does not select a model or enter a k
 
 ## Updating without repeating setup
 
-Close the app, place `Update-Lamatna.bat` in the existing extracted application folder, and run it. It downloads source from this team's public GitHub repository and updates app files while preserving `.venv`, `models/` and `.local/`. Reopen `Start-Game-Day.bat`. The same folder retains your installed dependencies and saved games.
+Close the app, place `Update-Lamatna.bat` in the existing extracted application folder, and run it. It downloads source from this team's public GitHub repository and updates app files while preserving `.venv`, `models/` and `.local/`. Reopen `Lamatna.bat`. The same folder retains your installed dependencies and saved games.
 
 ## Desktop features
 
-- Game home, family setup, play, moments and settings pages.
+- Sports home, teams, play, results and settings pages.
 - Animated page fades, dark/light themes, reduced motion, scrollable panels and compact bottom navigation.
 - Team and individual modes, player roster, rounds, timed turns and tie-break rounds.
 - Camera preview and recording **with microphone audio** using Qt Multimedia.
@@ -107,7 +104,7 @@ This prototype does not claim fully autonomous or production-grade sports refere
 
 Enter your own Gemini API key and choose the cloud connection under Settings → Advanced connection options before starting a new match. The key stays in memory. No key is needed in local mode. Never commit or send credentials in chat.
 
-Cloud mode sends the complete selected clip to Google only when Analyse is clicked and needs internet, API permissions, quota and a supported video model. The model name is editable (default `gemini-3.8-flash`). Cloud clips must be MP4, WebM or MOV, up to 14 MB. Both modes limit clips to five minutes. Cloud failures leave scores unchanged.
+Cloud mode sends the complete selected clip to Google only when Find this round’s results is clicked and needs internet, API permissions, quota and a supported video model. The model name is editable (default `gemini-3.8-flash`). Cloud clips must be MP4, WebM or MOV, up to 14 MB. Both modes limit clips to five minutes. Cloud failures leave scores unchanged.
 
 Reference: https://ai.google.dev/gemini-api/docs/video-understanding
 
@@ -127,7 +124,7 @@ Obtain participants' permission before recording. Local mode does not intentiona
 .\.venv\Scripts\python.exe -m unittest -v
 ```
 
-40 automated checks pass at this revision: core scoring/validation/signatures and offscreen Qt checks for match setup, scoring, turn advancement, autosave, duplicate rejection, local review gating, favourites, pre-play guidance, timer colours, saved-match restoration, efficient hashing and speech-only execution without a vision import, planner/journal persistence, feedback deduplication, recommendation adaptation and Arabic label switching with the logo preserved. Test fixtures are explicitly synthetic; cloud transport is mocked.
+45 automated checks pass at this revision: core scoring/validation/signatures and offscreen Qt checks for match setup, scoring, turn advancement, autosave, duplicate rejection, local review gating, favourites, pre-play guidance, timer colours, saved-match restoration, efficient hashing and speech-only execution without a vision import, planner/journal persistence, feedback deduplication, recommendation adaptation and Arabic label switching with the logo preserved, launcher environment reuse/recovery, and the football-first flow. Test fixtures are explicitly synthetic; cloud transport is mocked.
 
 The Qt interface was launched and visually inspected in a Linux offscreen environment at 1240×900 and 850×720, in light and dark modes. **Windows camera/microphone recording, real model inference on footage, model download on the team's connection, and real AI judging accuracy still need student acceptance testing.** Use `TESTING.md` to record actual expected/observed results. No camera or real-game accuracy pass is claimed.
 
@@ -139,7 +136,7 @@ Submit separate PDFs: exactly 30 presentation slides, six report pages, and all 
 
 ## Source layout
 
-`app.py` launches Lamatna; `studio.py` builds the family-facing experience; `ui_kit.py` holds shared appearance and vector game illustrations; `session_ui.py` retains the validated match/evidence engine and the earlier interface. `local_ai.py` runs local observation pipelines; `judge.py` handles the optional cloud connection; `core.py` defines game rules, validation and signatures. `assets/` contains Lamatna’s transparent courtyard-and-palm identity. Figma reached the connected Starter-plan tool limit during this revision, so the new branding and illustration were completed as native vector/Qt assets.
+`Lamatna.bat` and `launcher.py` handle one-click setup, startup and the desktop shortcut; `app.py` launches Lamatna; `studio.py` builds the family-facing experience; `ui_kit.py` holds shared appearance and vector game illustrations; `session_ui.py` retains the validated match/evidence engine and the earlier interface. `local_ai.py` runs local observation pipelines; `judge.py` handles the optional cloud connection; `core.py` defines game rules, validation and signatures. `assets/` contains Lamatna’s transparent courtyard-and-palm identity. Figma reached the connected Starter-plan tool limit during this revision, so the new branding and illustration were completed as native vector/Qt assets.
 
 Visual direction: warm ivory, palm green and quiet brass accents. The application assets are included in this repository.
 
