@@ -50,3 +50,9 @@ Do not replace pending with passed without checking the actual result.
 28 automated checks passed. New checks cover pre-play guidance, no sidebar/four-tab navigation, favourites persistence, countdown colour changes, local-mode default, saved-match restoration, streaming hashes, efficiency profiles and speech-only execution without a vision-model import.
 
 Light and dark layouts were visually inspected at 1240×900 and 850×720. These are offscreen Qt checks, not Windows hardware tests. Windows camera/audio recording, installer/updater execution, peak RAM and real model accuracy still need acceptance tests on the team's laptop.
+
+## Lamatna daily-family update
+
+40 automated checks pass, including persistent plans, bilingual memory text, blank/invalid input rejection, feedback deduplication, recommendation adaptation and Arabic label switching without losing the logo. Offscreen GUI smoke checks confirmed adding a plan, saving a memory, switching English/Arabic and starting a game.
+
+New logo alpha transparency is verified. Gameplay model accuracy, camera/audio on Windows and peak RAM still require the team's real-device tests. UI localization covers main labels and RTL layout; detailed game rules, some secondary controls and recognition evidence remain English.

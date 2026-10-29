@@ -50,4 +50,11 @@ class StudioTests(unittest.TestCase):
     def test_saved_match_restores(self):
         self.w.receive_report(sign(self.report(),self.w.secret));self.w.apply_report();path=next((Path(self.tmp.name)/'sessions').glob('*.json'));self.w.points['P1']=8;self.w.players={};self.w.restore_session(str(path));self.assertEqual(self.w.points['P1'],1);self.assertEqual(self.w.round,2)
 
+    def test_arabic_toggle_keeps_logo(self):
+        self.w.toggle_language();self.assertEqual(self.w.nav[0].text(),'الرئيسية');self.assertFalse(self.w.brand.pixmap().isNull());self.w.toggle_language();self.assertEqual(self.w.nav[0].text(),'Home')
+    def test_daily_memory_is_saved(self):
+        self.w.memory_title.setText('First game');self.w.memory_body.setPlainText('A family moment.');self.w.save_memory();self.assertEqual(len(self.w.family_store.memories()),1)
+    def test_family_plan_is_saved(self):
+        self.w.plan_title.setText('Call grandparents');self.w.add_plan();self.assertEqual(len(self.w.family_store.plans()),1)
+
 if __name__=='__main__':unittest.main()

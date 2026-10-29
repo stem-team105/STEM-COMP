@@ -1,4 +1,4 @@
-# RALLY — Team 105
+# Lamatna — Team 105
 
 A family-first desktop game host built for the Advanced (Champions) track of the 2026 COE STEM Programming with AI Competition.
 
@@ -19,6 +19,20 @@ VS Code terminal after installation:
 
 The original minimal Tkinter interface remains available as `py legacy_app.py`.
 
+## Daily family features
+
+Lamatna (لمّتنا) follows Sila's ivory, palm-green and brass visual direction with an Emirati courtyard illustration and a new transparent palm-and-home logo. The app and window icon use the new artwork in `assets/lamatna-mark.svg` and `.png`. This is Lamatna's own implementation; no NoteMind application code or assets are imported.
+
+- **Today, together:** select energy, indoor/outdoor space and available time for a game recommendation.
+- **Our next gathering:** add dated family plans and tick them off when done. These are local plans, not background notification/reminder services.
+- **Our memories:** save Arabic/English text notes and revisit them in Moments.
+- **We enjoyed this:** after a completed game, explicit feedback adapts future game suggestions.
+- **Arabic / English:** a header control switches main labels and mirrors layout for Arabic. Detailed rules, some secondary controls and model evidence remain English; English is the supported speech-recognition language.
+
+Planner, journal and feedback are saved in `.local/family.sqlite3`. Game sessions keep the same signed storage as previous versions. `Update-RALLY.bat` is retained for compatibility; `Update-Lamatna.bat` is the current named updater. Neither deletes saved data, downloaded models or installed packages.
+
+The new recommendation model is a categorical Naive Bayes classifier fitted on 20 disclosed synthetic seed examples plus explicit local family feedback. It is small and runs entirely in the Python standard library. It is separate from the upstream-pretrained gameplay vision and speech models. Read `MODEL-CARD.md` for data, limitations and training attribution.
+
 ## Everyday family flow
 
 The main interface uses plain family language. It opens on Home with a quick game suggestion, colourful game cards, favourites and game filters. Select a game to see a pre-play suggestion, equipment, safety tip and a blue duration badge. Family names and teams are edited in a simple table. The Play page contains a timer, camera and results review. Moments contains scores, replay and saved games. Settings lives in the top bar.
@@ -29,7 +43,7 @@ Local processing is the default. The family does not select a model or enter a k
 
 ## Updating without repeating setup
 
-Close the app, place `Update-RALLY.bat` in the existing extracted application folder, and run it. It downloads source from this team's public GitHub repository and updates app files while preserving `.venv`, `models/` and `.local/`. Reopen `Start-Game-Day.bat`. The same folder retains your installed dependencies and saved games.
+Close the app, place `Update-Lamatna.bat` in the existing extracted application folder, and run it. It downloads source from this team's public GitHub repository and updates app files while preserving `.venv`, `models/` and `.local/`. Reopen `Start-Game-Day.bat`. The same folder retains your installed dependencies and saved games.
 
 ## Desktop features
 
@@ -113,7 +127,7 @@ Obtain participants' permission before recording. Local mode does not intentiona
 .\.venv\Scripts\python.exe -m unittest -v
 ```
 
-28 automated checks pass at this revision: core scoring/validation/signatures and offscreen Qt checks for match setup, scoring, turn advancement, autosave, duplicate rejection, local review gating, favourites, pre-play guidance, timer colours, saved-match restoration, efficient hashing and speech-only execution without a vision import. Test fixtures are explicitly synthetic; cloud transport is mocked.
+40 automated checks pass at this revision: core scoring/validation/signatures and offscreen Qt checks for match setup, scoring, turn advancement, autosave, duplicate rejection, local review gating, favourites, pre-play guidance, timer colours, saved-match restoration, efficient hashing and speech-only execution without a vision import, planner/journal persistence, feedback deduplication, recommendation adaptation and Arabic label switching with the logo preserved. Test fixtures are explicitly synthetic; cloud transport is mocked.
 
 The Qt interface was launched and visually inspected in a Linux offscreen environment at 1240×900 and 850×720, in light and dark modes. **Windows camera/microphone recording, real model inference on footage, model download on the team's connection, and real AI judging accuracy still need student acceptance testing.** Use `TESTING.md` to record actual expected/observed results. No camera or real-game accuracy pass is claimed.
 
@@ -125,9 +139,11 @@ Submit separate PDFs: exactly 30 presentation slides, six report pages, and all 
 
 ## Source layout
 
-`app.py` launches RALLY; `studio.py` builds the family-facing experience; `ui_kit.py` holds shared appearance and vector game illustrations; `session_ui.py` retains the validated match/evidence engine and the earlier interface. `local_ai.py` runs local observation pipelines; `judge.py` handles the optional cloud connection; `core.py` defines game rules, validation and signatures. `assets/` contains the approved vector RALLY identity from Figma.
+`app.py` launches Lamatna; `studio.py` builds the family-facing experience; `ui_kit.py` holds shared appearance and vector game illustrations; `session_ui.py` retains the validated match/evidence engine and the earlier interface. `local_ai.py` runs local observation pipelines; `judge.py` handles the optional cloud connection; `core.py` defines game rules, validation and signatures. `assets/` contains Lamatna’s transparent courtyard-and-palm identity. Figma reached the connected Starter-plan tool limit during this revision, so the new branding and illustration were completed as native vector/Qt assets.
 
-Editable design: https://www.figma.com/design/0Ed17nTtib8RkYoWlJoqYO?node-id=7-22
+Visual direction: warm ivory, palm green and quiet brass accents. The application assets are included in this repository.
+
+`family.py`, `daily_features.py`, `recommendation.py` and `locale_ui.py` implement the daily family features, lightweight recommendations and main Arabic labels. `VIDEO-PLAN.md` contains the two-minute demonstration outline.
 
 ## Licensing
 
