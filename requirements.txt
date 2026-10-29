@@ -1,0 +1,2 @@
+# No pip packages required. Uses Python 3.11+ standard library and Tkinter.
+# Windows Python installer includes Tkinter by default.

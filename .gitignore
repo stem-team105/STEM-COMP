@@ -1,0 +1,7 @@
+.local/
+__pycache__/
+.env
+*.mp4
+*.mov
+*.webm
+*.key
