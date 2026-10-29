@@ -47,6 +47,12 @@ class LauncherTests(unittest.TestCase):
             launcher.install_game_support(Path('family app'), Path('python.exe'), run, Mock())
         self.assertEqual(run.call_count, 1)
 
+    def test_windowed_entrypoint_finds_launcher_beside_it(self):
+        entry=Path(launcher.__file__).resolve().with_name('Open-Lamatna.pyw')
+        with patch('runpy.run_path') as run:
+            exec(compile(entry.read_text(),str(entry),'exec'),{'__name__':'__main__','__file__':str(entry)})
+        run.assert_called_once_with(str(entry.with_name('launcher.py')),run_name='__main__')
+
 
 if __name__ == '__main__':
     unittest.main()

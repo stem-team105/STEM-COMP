@@ -54,30 +54,6 @@ def install_game_support(root, python, run, status):
          'from local_ai import download_models; download_models(print)'])
 
 
-def desktop_shortcut(root, log):
-    """Point the Windows desktop shortcut at this folder; paths are data, not PS code."""
-    if os.name != 'nt':
-        return
-    env = os.environ.copy()
-    env['LAMATNA_FOLDER'] = str(root)
-    script = (
-        "$ErrorActionPreference='Stop'; "
-        "$desktop=[Environment]::GetFolderPath('Desktop'); "
-        "if (-not $desktop) { exit 0 }; "
-        "$shell=New-Object -ComObject WScript.Shell; "
-        "$shortcut=$shell.CreateShortcut((Join-Path $desktop 'Lamatna.lnk')); "
-        "$shortcut.TargetPath=Join-Path $env:LAMATNA_FOLDER 'Lamatna.bat'; "
-        "$shortcut.WorkingDirectory=$env:LAMATNA_FOLDER; "
-        "$shortcut.Description='Family sport, together'; "
-        "$shortcut.Save()"
-    )
-    try:
-        subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script],
-                       env=env, stdout=log, stderr=log, creationflags=NO_WINDOW, timeout=15)
-    except (OSError, subprocess.TimeoutExpired):
-        log.write('\nDesktop shortcut unavailable; Lamatna.bat still works.\n')
-
-
 def main():
     import tkinter as tk
     from tkinter import ttk, messagebox
@@ -138,7 +114,6 @@ def main():
                     install_game_support(ROOT, python, run, lambda value:events.put(('status', value)))
                 if cancelled.is_set():
                     return
-                desktop_shortcut(ROOT, log)
                 events.put(('status', 'Opening your family sports hub…'))
                 process[0] = subprocess.Popen([str(python), str(ROOT / 'app.py')],
                     cwd=str(ROOT), stdout=log, stderr=log, creationflags=NO_WINDOW)

@@ -63,4 +63,17 @@ class StudioTests(unittest.TestCase):
         self.assertEqual([b.text() for b in self.w.nav],['Home','Teams','Play','Results'])
         self.assertTrue(self.w.sport_plans.isHidden());self.assertTrue(self.w.sport_notes.isHidden())
 
+    def test_suggestion_can_open_and_start_a_real_game(self):
+        self.assertTrue(self.w.suggestions_panel.isHidden());self.w.toggle_suggestions()
+        self.assertFalse(self.w.suggestions_panel.isHidden());self.w.try_suggestion()
+        self.assertEqual(self.w.game.currentText(),self.w.suggested_game);self.assertEqual(self.w.stack.currentIndex(),1)
+
+    def test_score_tiles_sum_actual_player_points(self):
+        self.w.points['P1']=2;self.w.points['P2']=3;self.w.points['P3']=1;self.w.refresh()
+        self.assertEqual([x.text() for x in self.w.result_metrics],['5','1','4'])
+
+    def test_filtered_grid_only_lays_out_selected_games(self):
+        self.w.favourite('Dune Steps');self.w.filter_games('Favourites')
+        self.assertEqual(self.w.game_grid.count(),1);self.assertIs(self.w.game_grid.itemAt(0).widget(),self.w.game_cards['Dune Steps'])
+
 if __name__=='__main__':unittest.main()

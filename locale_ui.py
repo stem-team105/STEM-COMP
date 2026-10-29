@@ -2,6 +2,13 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel,QAbstractButton
 TEXT={
+'Good days start with a game.':'أجمل الأيام تبدأ بلعبة.','A little movement. A little team spirit. Everyone together.':'حركة، وروح فريق، ولحظات تجمعنا جميعًا.',
+'LAMATNA FAMILY SPORTS':'لمّتنا للرياضة العائلية','Big cheers.\nCloser families.':'هتافات تملأ المكان.\nوعائلة أقرب.',
+'Your next family match starts here. Set up your teams, capture the action and review every round.':'مباراتكم العائلية القادمة تبدأ هنا. شكّلوا الفرق، وسجّلوا اللعب، وراجعوا كل جولة.',
+'Start a football match  →':'ابدأوا مباراة كرة قدم  ←','Help us choose':'ساعدنا في الاختيار','Pick your next challenge':'اختاروا تحديكم القادم','Play  →':'لنلعب  ←',
+'Choose your game':'اختاروا لعبتكم','5 games for your family':'خمس ألعاب لعائلتكم','Build your teams':'شكّلوا فرقكم','Names, rounds & quick tips':'أسماء وجولات ونصائح سريعة','Play & look back':'العبوا وراجعوا الجولة','Record, review & celebrate':'سجّلوا وراجعوا واحتفلوا',
+'Meet your teams':'تعرّفوا على الفرق','The final whistle. The shared smiles.':'صافرة النهاية. وابتسامات تجمعنا.','Your scores, possession MVP and the moments worth playing back.':'نتائجكم وأفضل لاعب في الاستحواذ وأجمل اللحظات للمشاهدة مجددًا.',
+'Team A points':'نقاط الفريق أ','Team B points':'نقاط الفريق ب','Players':'اللاعبون','Highest score':'أعلى نتيجة','Round':'الجولة',
 'Teams':'الفرق','Results':'النتائج','Family sport, together.':'رياضة تجمع العائلة.',
 'Five family games. Clear rules, timed rounds and results you can review.':'خمس ألعاب عائلية، وقواعد واضحة، وجولات محددة الوقت، ونتائج يمكنكم مراجعتها.',
 'YOUR FAMILY GAME DAY':'يومكم الرياضي العائلي','A little team spirit.\nA lot of family time.':'روح الفريق.\nولحظات تجمع العائلة.',

@@ -2,25 +2,25 @@
 
 A family-sports desktop game host built for the Advanced (Champions) track of the 2026 COE STEM Programming with AI Competition.
 
-## Open on Windows — one double-click
+## Open with your installed Python
 
-1. Download the GitHub ZIP, choose **Extract all**, and open the folder containing `app.py`.
-2. Double-click **Lamatna.bat**. A small setup window prepares the interface if needed, then opens the app. No PowerShell commands or VS Code are needed.
-3. Next time, use the **Lamatna** desktop shortcut created by the launcher. Keep the extracted application folder in place.
+1. Download and extract the source ZIP. Open the folder containing `app.py`.
+2. Double-click **Open-Lamatna.pyw** if Windows associates `.pyw` files with your installed Python. A small setup window prepares the interface when needed, then opens Lamatna.
+3. With VS Code and the school's approved Python interpreter, open `launcher.py` and choose **Run Python File**. If the interface is already installed in `.venv`, run `.\.venv\Scripts\python.exe app.py` from the project folder.
 
-Your existing `.venv`, model downloads and saved matches are reused. `Start-Game-Day.bat` opens the same launcher for compatibility. Initial interface setup needs internet; later launches skip installation when the interface is already available. Errors appear in a window and `.local/startup.log` rather than disappearing with the console.
+This route does not run batch files or PowerShell, change Windows security settings, remove download security marks, or request administrator privileges. School policy may still block Python, downloaded source or package downloads. Only the school's IT administrator can approve a managed restriction; a source launcher cannot guarantee exemption from Windows Security.
 
-For local video/speech review, choose **Settings → Set up offline game support** once. If packages are missing, the app closes, a setup window installs CPU packages and pretrained model files, and Lamatna reopens. This larger download may take several minutes and needs internet/disk space. No API key is needed after local setup. `Install-Local-AI.bat` remains an alternative.
+Existing `.venv`, model files and saved matches are reused when the source is updated in the same application folder. Initial interface setup needs internet; later launches skip installation if the interface imports successfully. Errors appear in a window and `.local/startup.log`. Automatic desktop shortcut creation has been removed. Earlier manually/automatically created shortcuts can still point to the compatibility batch launcher; use the Python entry point for this revision.
 
-Python 3.11–3.13 (64-bit, with Tkinter) is recommended. The launcher detects the team's installed Python automatically. This is a Python application with a one-click launcher, not a standalone Windows EXE. Actual Windows launcher, shortcut and hardware acceptance tests remain pending.
+For local video/speech review, choose **Settings → Set up offline game support** once. Missing packages open the Python setup window, close Lamatna, install CPU packages and pretrained files, then reopen the app. Downloads can take several minutes and require internet/disk space. No API key is needed after local setup.
 
-Developers can still run `.\.venv\Scripts\python.exe app.py` from the app folder.
+Python 3.11–3.13 (64-bit, with Tkinter) is recommended. This is a Python source application, not a signed Windows EXE. Windows launcher, hardware and real-footage acceptance checks remain pending.
 
 ## Family sports first
 
 Lamatna (لمّتنا) follows Sila's ivory, palm-green and brass visual direction with an Emirati courtyard illustration and a new transparent palm-and-home logo. The app and window icon use the new artwork in `assets/lamatna-mark.svg` and `.png`. This is Lamatna's own implementation; no NoteMind application code or assets are imported.
 
-- **Today, together:** select energy, indoor/outdoor space and available time for a game recommendation.
+- **Help us choose:** open the optional game suggestion panel and select energy, indoor/outdoor space and available time.
 - **Plan another sports day:** an optional expandable section below game setup saves dated match/activity plans. These are local plans, not background reminders.
 - **Sports-day notes:** an optional expandable section after the scoreboard/replays saves Arabic/English match highlights and lessons.
 - **We enjoyed this:** after a completed game, explicit feedback adapts future game suggestions.
@@ -32,15 +32,17 @@ The new recommendation model is a categorical Naive Bayes classifier fitted on 2
 
 ## Family sports flow
 
-The home page leads with football, then a family game suggestion, game cards, favourites and filters. The four bottom tabs are **Home → Teams → Play → Results**. Select a game to see equipment, a safety tip and a coloured duration badge before playing. Enter the family roster and teams, then record/upload a turn. Results leads with the scoreboard, possession MVP, replays and saved matches. Plans and notes are optional, collapsed extras. All five challenge games remain available, including Story Relay; it is a storytelling game, not a physical sport.
+The home page uses an ivory canvas, deep palm-green feature panel, original family-football vector artwork and warm gold actions. Compact game cards use coloured illustrations and duration badges. Help us choose opens the game recommendation panel. Line icons identify the four bottom tabs. Teams shows colour-coded roster counts; Results has live score summary cards above the table. The four bottom tabs are **Home → Teams → Play → Results**. Select a game to see equipment, a safety tip and a coloured duration badge before playing. Enter the family roster and teams, then record/upload a turn. Results leads with the scoreboard, possession MVP, replays and saved matches. Plans and notes are optional, collapsed extras. All five challenge games remain available, including Story Relay; it is a storytelling game, not a physical sport.
 
 The sidebar is removed. Four bottom tabs provide tablet-style navigation on a desktop. Light/dark appearance and reduced animation are supported. Timer digits turn amber at 15 seconds and red at five, with text and a progress bar alongside the colour.
 
 Local processing is the default. The family does not select a model or enter a key in the normal flow. Optional cloud controls are hidden under Settings → Advanced connection options. The app asks for a one-time camera-view calibration when a local game requires it. Uncertain local points still require honest host review.
 
-## Updating without repeating setup
+## Update source in the existing folder
 
-Close the app, place `Update-Lamatna.bat` in the existing extracted application folder, and run it. It downloads source from this team's public GitHub repository and updates app files while preserving `.venv`, `models/` and `.local/`. Reopen `Lamatna.bat`. The same folder retains your installed dependencies and saved games.
+Close Lamatna. Download the latest source ZIP from this repository and extract it. Copy the contents of the new source folder into the existing app folder and choose **Replace files**. Keep `.venv`, `models/` and `.local/` in place. Then open `Open-Lamatna.pyw` or run `launcher.py` with your installed Python.
+
+The legacy `.bat` launchers/updaters remain for compatibility; they are optional. They are not required for the Python launch route.
 
 ## Desktop features
 
@@ -124,7 +126,7 @@ Obtain participants' permission before recording. Local mode does not intentiona
 .\.venv\Scripts\python.exe -m unittest -v
 ```
 
-45 automated checks pass at this revision: core scoring/validation/signatures and offscreen Qt checks for match setup, scoring, turn advancement, autosave, duplicate rejection, local review gating, favourites, pre-play guidance, timer colours, saved-match restoration, efficient hashing and speech-only execution without a vision import, planner/journal persistence, feedback deduplication, recommendation adaptation and Arabic label switching with the logo preserved, launcher environment reuse/recovery, and the football-first flow. Test fixtures are explicitly synthetic; cloud transport is mocked.
+49 automated checks pass at this revision: core scoring/validation/signatures and offscreen Qt checks for match setup, scoring, turn advancement, autosave, duplicate rejection, local review gating, favourites, pre-play guidance, timer colours, saved-match restoration, efficient hashing and speech-only execution without a vision import, planner/journal persistence, feedback deduplication, recommendation adaptation and Arabic label switching with the logo preserved, launcher environment reuse/recovery, the football-first flow, game-grid filtering, actual score summaries, optional recommendations and the direct Python entry point. Test fixtures are explicitly synthetic; cloud transport is mocked.
 
 The Qt interface was launched and visually inspected in a Linux offscreen environment at 1240×900 and 850×720, in light and dark modes. **Windows camera/microphone recording, real model inference on footage, model download on the team's connection, and real AI judging accuracy still need student acceptance testing.** Use `TESTING.md` to record actual expected/observed results. No camera or real-game accuracy pass is claimed.
 
@@ -136,7 +138,7 @@ Submit separate PDFs: exactly 30 presentation slides, six report pages, and all 
 
 ## Source layout
 
-`Lamatna.bat` and `launcher.py` handle one-click setup, startup and the desktop shortcut; `app.py` launches Lamatna; `studio.py` builds the family-facing experience; `ui_kit.py` holds shared appearance and vector game illustrations; `session_ui.py` retains the validated match/evidence engine and the earlier interface. `local_ai.py` runs local observation pipelines; `judge.py` handles the optional cloud connection; `core.py` defines game rules, validation and signatures. `assets/` contains Lamatna’s transparent courtyard-and-palm identity. Figma reached the connected Starter-plan tool limit during this revision, so the new branding and illustration were completed as native vector/Qt assets.
+`Open-Lamatna.pyw` and `launcher.py` handle direct Python setup/startup without PowerShell; `app.py` launches Lamatna; `studio.py` builds the family-facing experience; `ui_kit.py` holds shared appearance and vector game illustrations; `session_ui.py` retains the validated match/evidence engine and the earlier interface. `local_ai.py` runs local observation pipelines; `judge.py` handles the optional cloud connection; `core.py` defines game rules, validation and signatures. `assets/` contains Lamatna’s transparent courtyard-and-palm identity. Figma reached the connected Starter-plan tool limit during this revision, so the new branding and illustration were completed as native vector/Qt assets.
 
 Visual direction: warm ivory, palm green and quiet brass accents. The application assets are included in this repository.
 

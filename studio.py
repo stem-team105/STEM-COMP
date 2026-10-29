@@ -1,7 +1,7 @@
 """Lamatna: family sports and friendly games over the tested match engine."""
 import html,json,os,sys,time,uuid,subprocess,importlib.util
 from pathlib import Path
-from PySide6.QtCore import Qt,QTimer,QUrl,QPropertyAnimation,QEasingCurve
+from PySide6.QtCore import Qt,QTimer,QUrl,QPropertyAnimation,QEasingCurve,QSize
 from PySide6.QtGui import QPixmap,QIcon,QShortcut,QKeySequence,QDesktopServices
 from PySide6.QtWidgets import (QApplication,QMainWindow,QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,QFrame,QStackedWidget,QLineEdit,QTextEdit,QComboBox,QSpinBox,QProgressBar,QFileDialog,QMessageBox,QTableWidget,QTableWidgetItem,QHeaderView,QScrollArea,QGraphicsOpacityEffect,QCheckBox,QSlider,QStackedLayout,QListWidget,QListWidgetItem,QAbstractItemView)
 from PySide6.QtMultimedia import QMediaPlayer,QAudioOutput,QMediaDevices,QCamera,QAudioInput,QMediaCaptureSession,QMediaRecorder
@@ -10,7 +10,7 @@ import session_ui
 from session_ui import Studio as MatchEngine,Calibration
 from core import GAMES,local_secret,sign,verify,validate
 from judge import DEFAULT_MODEL
-from ui_kit import theme,label,button,card,GameArt,HeritageScene,GAME_INFO
+from ui_kit import theme,label,button,card,GameArt,HeritageScene,FamilySportScene,navigation_icon,GAME_INFO
 from daily_features import DailyFeatures
 from locale_ui import apply_language
 ROOT=Path(__file__).resolve().parent
@@ -31,7 +31,7 @@ class Studio(DailyFeatures,MatchEngine):
         outer.addWidget(self.stack,1)
         dock_holder=QHBoxLayout();dock_holder.addStretch();dock=QFrame();dock.setObjectName('dock');dock_row=QHBoxLayout(dock);dock_row.setContentsMargins(7,6,7,6);dock_row.setSpacing(4)
         for i,title in enumerate(['Home','Teams','Play','Results']):
-            b=button(title,lambda checked=False,i=i:self.navigate(i));b.setObjectName('tab');b.setCheckable(True);b.setMinimumWidth(100);dock_row.addWidget(b);self.nav.append(b)
+            b=button(title,lambda checked=False,i=i:self.navigate(i));b.setObjectName('tab');b.setIconSize(QSize(19,19));b.setCheckable(True);b.setMinimumWidth(105);dock_row.addWidget(b);self.nav.append(b)
         dock_holder.addWidget(dock);dock_holder.addStretch();outer.addLayout(dock_holder)
         self.status=label('Choose a game. Build your teams. Play together.','muted');self.status.setAlignment(Qt.AlignCenter);self.status.setMinimumHeight(22);outer.addWidget(self.status)
         self.library_page();self.setup_page();self.arena_page();self.results_page();self.settings_page()
@@ -41,6 +41,8 @@ class Studio(DailyFeatures,MatchEngine):
     def resizeEvent(self,event):
         super().resizeEvent(event)
         if hasattr(self,'tagline'):self.tagline.setVisible(self.width()>=1120)
+        if hasattr(self,'sports_scene'):self.sports_scene.setFixedSize(340,218) if self.width()>=1050 else self.sports_scene.setFixedSize(235,190)
+        if hasattr(self,'game_grid'):self.reflow_games()
     def fullscreen(self):self.showNormal() if self.isFullScreen() else self.showFullScreen()
     def page(self,title,sub):
         content=QWidget();l=QVBoxLayout(content);l.setContentsMargins(12,10,12,14);l.setSpacing(20);l.addWidget(label(title,'title'));l.addWidget(label(sub,'muted'))
@@ -49,7 +51,7 @@ class Studio(DailyFeatures,MatchEngine):
         if i==2 and not self.players:i=1;self.status.setText('Pick a game and meet your players before you begin.')
         if i==3:self.refresh_saved()
         self.stack.setCurrentIndex(i)
-        for k,b in enumerate(self.nav):b.setChecked(k==i)
+        for k,b in enumerate(self.nav):b.setChecked(k==i);b.setIcon(navigation_icon(k,k==i,self.theme))
         if hasattr(self,'animation'):
             self.animation.stop()
             if hasattr(self,'fade_target'):self.fade_target.setGraphicsEffect(None)
@@ -59,21 +61,43 @@ class Studio(DailyFeatures,MatchEngine):
             target=self.pages[i].widget();self.fade_target=target;effect=QGraphicsOpacityEffect(target);target.setGraphicsEffect(effect);self.animation=QPropertyAnimation(effect,b'opacity',self);self.animation.setDuration(190);self.animation.setEasingCurve(QEasingCurve.OutCubic);self.animation.setStartValue(.65);self.animation.setEndValue(1);self.animation.finished.connect(lambda t=target:t.setGraphicsEffect(None));self.animation.start()
     def toggle_theme(self):
         self.theme=not self.theme;QApplication.instance().setStyleSheet(theme(self.theme));self.brand.setPixmap(QPixmap(str(ROOT/'assets'/('lamatna-mark-on-dark.svg' if self.theme else 'lamatna-mark.svg'))).scaled(48,48,Qt.KeepAspectRatio,Qt.SmoothTransformation));self.save_preferences(quiet=True)
+        for k,b in enumerate(self.nav):b.setIcon(navigation_icon(k,k==self.stack.currentIndex(),self.theme))
     def library_page(self):
-        l=self.page('Family sport, together.','Five family games. Clear rules, timed rounds and results you can review.')
-        hero=QFrame();hero.setObjectName('card');h=QHBoxLayout(hero);h.setContentsMargins(28,26,28,26)
-        text=QVBoxLayout();text.addWidget(label('YOUR FAMILY GAME DAY','eyebrow'));text.addWidget(label('A little team spirit.\nA lot of family time.','title'));text.addWidget(label('Start a football match, record the action and review goals, possession and your MVP.','muted'));row=QHBoxLayout();self.football_button=button('Play football  →',lambda:self.select_game('Football'),True);row.addWidget(self.football_button);duration=label('60 sec','duration');duration.setMaximumWidth(95);row.addWidget(duration);row.addStretch();text.addLayout(row);h.addLayout(text,1);h.addWidget(HeritageScene());l.addWidget(hero);l.addWidget(self.daily_card())
-        row=QHBoxLayout();browse_title=label('Find your next game','heading');browse_title.setWordWrap(False);row.addWidget(browse_title);row.addStretch();self.filter=QComboBox();self.filter.addItems(['All games','Team games','Individual games','Favourites']);self.filter.currentTextChanged.connect(self.filter_games);row.addWidget(self.filter);l.addLayout(row)
-        grid=QGridLayout();grid.setSpacing(16)
-        descriptions={'Football':'A friendly match with goals, shared moments and a player MVP.','Majlis Delivery':'Steady hands, a soft ball, and a delivery worth cheering for.','Falcon Freeze':'A quick game of moving, freezing and trying not to laugh.','Dune Steps':'Follow a little trail. Take each step at your own pace.','Family Story Relay':'Three words. One shared adventure. Let your imagination lead.'}
-        for i,name in enumerate(GAMES):
-            info=GAME_INFO[name];w,c=card();top=QHBoxLayout();top.addWidget(GameArt(name,62));top.addStretch();fav=button('☆',lambda checked=False,n=name:self.favourite(n));fav.setObjectName('ghost');fav.setCheckable(True);fav.setToolTip('Save to favourites');top.addWidget(fav);self.fav_buttons[name]=fav;c.addLayout(top);c.addWidget(label(name,'heading'));c.addWidget(label(descriptions[name],'muted'));row=QHBoxLayout();row.addWidget(label(info[0],'pill'));row.addStretch();row.addWidget(label(info[1],'duration'));c.addLayout(row);c.addWidget(button('Let’s play  →',lambda checked=False,n=name:self.select_game(n),True));grid.addWidget(w,i//2,i%2);self.game_cards[name]=w
-        l.addLayout(grid);self.favourite_empty=label('Save a game with the star to find it here.','muted');self.favourite_empty.hide();l.addWidget(self.favourite_empty);l.addStretch()
+        l=self.page('Good days start with a game.','A little movement. A little team spirit. Everyone together.')
+        hero=QFrame();hero.setObjectName('hero');h=QHBoxLayout(hero);h.setContentsMargins(28,23,22,23);h.setSpacing(14)
+        text=QVBoxLayout();text.setSpacing(10);text.addWidget(label('LAMATNA FAMILY SPORTS','heroeyebrow'))
+        text.addWidget(label('Big cheers.\nCloser families.','herotitle'))
+        text.addWidget(label('Your next family match starts here. Set up your teams, capture the action and review every round.','herosub'))
+        row=QHBoxLayout();self.football_button=button('Start a football match  →',lambda:self.select_game('Football'));self.football_button.setObjectName('heroaction');row.addWidget(self.football_button)
+        pick=button('Help us choose',self.toggle_suggestions);pick.setObjectName('herosecondary');row.addWidget(pick);row.addStretch();text.addLayout(row)
+        h.addLayout(text,1);self.sports_scene=FamilySportScene();h.addWidget(self.sports_scene);l.addWidget(hero)
+        strip,c=card();c.setContentsMargins(20,13,20,13);steps=QHBoxLayout();steps.setSpacing(12)
+        for number,title,sub in [('01','Choose your game','5 games for your family'),('02','Build your teams','Names, rounds & quick tips'),('03','Play & look back','Record, review & celebrate')]:
+            col=QVBoxLayout();line=QHBoxLayout();line.addWidget(label(number,'eyebrow'));line.addWidget(label(title,'heading'),1);col.addLayout(line);col.addWidget(label(sub,'muted'));steps.addLayout(col,1)
+        c.addLayout(steps);l.addWidget(strip)
+        self.suggestions_panel=self.daily_card();self.suggestions_panel.hide();l.addWidget(self.suggestions_panel)
+        row=QHBoxLayout();browse_title=label('Pick your next challenge','heading');browse_title.setWordWrap(False);row.addWidget(browse_title);row.addStretch();self.filter=QComboBox();self.filter.addItems(['All games','Team games','Individual games','Favourites']);self.filter.currentTextChanged.connect(self.filter_games);row.addWidget(self.filter);l.addLayout(row)
+        self.game_grid=QGridLayout();self.game_grid.setSpacing(14)
+        descriptions={'Football':'Goals, possession and your player MVP.','Majlis Delivery':'Balance a soft ball. Bring the team home.','Falcon Freeze':'Move, freeze and hold your pose.','Dune Steps':'Find your rhythm on a numbered trail.','Family Story Relay':'A calmer round of words and imagination.'}
+        for name in GAMES:
+            info=GAME_INFO[name];w,c=card();w.setObjectName('gamecard');c.setContentsMargins(19,17,19,17);c.setSpacing(9)
+            top=QHBoxLayout();top.addWidget(GameArt(name,48));top.addStretch();duration=label(info[1],'duration');top.addWidget(duration);fav=button('☆',lambda checked=False,n=name:self.favourite(n));fav.setObjectName('ghost');fav.setCheckable(True);fav.setToolTip('Save to favourites');top.addWidget(fav);self.fav_buttons[name]=fav;c.addLayout(top)
+            c.addWidget(label(name,'heading'));c.addWidget(label(descriptions[name],'muted'));row=QHBoxLayout();row.addWidget(label(info[0],'muted'));row.addStretch();play=button('Play  →',lambda checked=False,n=name:self.select_game(n));play.setObjectName('ghost');row.addWidget(play);c.addLayout(row);self.game_cards[name]=w
+        l.addLayout(self.game_grid);self.reflow_games();self.favourite_empty=label('Save a game with the star to find it here.','muted');self.favourite_empty.hide();l.addWidget(self.favourite_empty);l.addStretch()
+    def toggle_suggestions(self):
+        self.suggestions_panel.setVisible(self.suggestions_panel.isHidden())
+        if not self.suggestions_panel.isHidden():self.pages[0].ensureWidgetVisible(self.suggestions_panel)
+    def reflow_games(self):
+        columns=3 if self.width()>=1050 else 2;position=0
+        for name,w in self.game_cards.items():
+            self.game_grid.removeWidget(w)
+            visible=self.filter_name=='All games' or (self.filter_name=='Team games' and GAMES[name]['mode']=='Team') or (self.filter_name=='Individual games' and GAMES[name]['mode']=='Individual') or (self.filter_name=='Favourites' and name in self.favourites)
+            if visible:self.game_grid.addWidget(w,position//columns,position%columns);position+=1
     def filter_games(self,value):
         self.filter_name=value;shown=0
         for name,w in self.game_cards.items():
             visible=value=='All games' or (value=='Team games' and GAMES[name]['mode']=='Team') or (value=='Individual games' and GAMES[name]['mode']=='Individual') or (value=='Favourites' and name in self.favourites);w.setVisible(visible);shown+=visible
-        self.favourite_empty.setVisible(not shown)
+        self.favourite_empty.setVisible(not shown);self.reflow_games()
     def favourite(self,name):
         self.favourites.symmetric_difference_update({name});self.fav_buttons[name].setText('★' if name in self.favourites else '☆');self.fav_buttons[name].setChecked(name in self.favourites);self.filter_games(self.filter.currentText());self.save_preferences(quiet=True)
     def select_game(self,name):self.game.setCurrentText(name);self.change_rules(name);self.navigate(1)
@@ -81,7 +105,7 @@ class Studio(DailyFeatures,MatchEngine):
         l=self.page('Your game. Your teams.','Choose a game, add your family and check the equipment before playing.')
         row=QHBoxLayout();self.game=QComboBox();self.game.addItems(GAMES);self.game.currentTextChanged.connect(self.change_rules);row.addWidget(self.game,1);row.addWidget(label('Rounds','muted'));self.rounds=QSpinBox();self.rounds.setRange(1,10);self.rounds.setValue(1);row.addWidget(self.rounds);l.addLayout(row)
         w,c=card();self.tip_heading=label('Before you play','heading');c.addWidget(self.tip_heading);self.tip=label('','muted');c.addWidget(self.tip);row=QHBoxLayout();self.equipment=label('','pill');row.addWidget(self.equipment,1);self.setup_duration=label('60 sec','duration');row.addWidget(self.setup_duration);c.addLayout(row);self.safe_tip=label('','muted');c.addWidget(self.safe_tip);l.addWidget(w)
-        w,c=card('Who’s joining?','Use names or short nicknames. For team games, choose A or B.');self.people=QTableWidget(4,2);self.people.setHorizontalHeaderLabels(['Person','Team']);self.people.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch);self.people.verticalHeader().hide();self.people.setSelectionBehavior(QAbstractItemView.SelectRows);self.people.setMinimumHeight(190);self.people.setMaximumHeight(230)
+        w,c=card('Meet your teams','Use names or short nicknames. For team games, choose A or B.');self.team_summary=QFrame();self.team_summary.setStyleSheet('background:transparent;');team_row=QHBoxLayout(self.team_summary);team_row.setContentsMargins(0,0,0,0);self.team_a_info=label('Team A · 2 players','teamA');self.team_b_info=label('Team B · 2 players','teamB');team_row.addWidget(self.team_a_info);team_row.addWidget(self.team_b_info);team_row.addStretch();c.addWidget(self.team_summary);self.people=QTableWidget(4,2);self.people.setHorizontalHeaderLabels(['Person','Team']);self.people.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch);self.people.verticalHeader().hide();self.people.setSelectionBehavior(QAbstractItemView.SelectRows);self.people.setMinimumHeight(190);self.people.setMaximumHeight(230)
         for i in range(4):self.people.setItem(i,0,QTableWidgetItem('P'+str(i+1)));self.people.setItem(i,1,QTableWidgetItem('A' if i<2 else 'B'))
         self.people.cellChanged.connect(self.sync_roster);c.addWidget(self.people);row=QHBoxLayout();row.addWidget(button('+ Add person',self.add_person));row.addWidget(button('Remove selected',self.remove_person));row.addStretch();c.addLayout(row);l.addWidget(w)
         self.roster=QTextEdit();self.roster.hide();self.sync_roster()
@@ -90,11 +114,14 @@ class Studio(DailyFeatures,MatchEngine):
     def change_rules(self,name):
         if not hasattr(self,'rules'):return
         info=GAME_INFO[name];self.rules.setText(GAMES[name]['rules']);self.tip_heading.setText('Before you play '+name);self.tip.setText('Our suggestion: '+info[5]);self.equipment.setText(info[4]);self.setup_duration.setText(info[1]+' per round' if name=='Football' else info[1]+' per turn');self.safe_tip.setText(info[6])
+        if hasattr(self,'team_summary'):self.team_summary.setVisible(GAMES[name]['mode']=='Team')
     def sync_roster(self,*args):
         if self.updating_roster:return
         lines=[]
         for i in range(self.people.rowCount()):lines.append(', '.join(self.people.item(i,j).text().strip() if self.people.item(i,j) else '' for j in range(2)))
         if hasattr(self,'roster'):self.roster.setPlainText('\n'.join(lines))
+        if hasattr(self,'team_a_info'):
+            teams=[line.split(',',1)[1].strip().upper() for line in lines if ',' in line and line.split(',',1)[0].strip()];self.team_a_info.setText('Team A · '+str(teams.count('A'))+' players');self.team_b_info.setText('Team B · '+str(teams.count('B'))+' players')
     def add_person(self):
         if self.people.rowCount()>=12:return
         i=self.people.rowCount();self.people.insertRow(i);self.people.setItem(i,0,QTableWidgetItem('P'+str(i+1)));self.people.setItem(i,1,QTableWidgetItem('A' if i%2==0 else 'B'));self.sync_roster()
@@ -182,13 +209,23 @@ class Studio(DailyFeatures,MatchEngine):
         if isinstance(value,int):self.progress.setRange(0,100);self.progress.setValue(value)
         else:self.status.setText(str(value).replace('Local AI','Game support').replace('models','game files'))
     def results_page(self):
-        l=self.page('Every round counts.','Review your scoreboard, player MVP, replays and saved family matches.')
+        l=self.page('The final whistle. The shared smiles.','Your scores, possession MVP and the moments worth playing back.')
+        stats=QHBoxLayout();self.result_metrics=[];self.metric_titles=[]
+        for title in ['Team A points','Team B points','Players']:
+            w,c=card();c.setContentsMargins(20,15,20,15);heading=label(title,'muted');c.addWidget(heading);self.metric_titles.append(heading);value=label('—','metric');c.addWidget(value);stats.addWidget(w,1);self.result_metrics.append(value)
+        l.addLayout(stats)
         w,c=card('This game');self.outcome=label('Your next game is waiting.','title');c.addWidget(self.outcome);self.mvp=label('Play a round to start your scoreboard.','muted');c.addWidget(self.mvp);l.addWidget(w)
         self.table=QTableWidget(0,4);self.table.setHorizontalHeaderLabels(['Person','Team','Points','Time with the ball']);self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch);self.table.verticalHeader().hide();self.table.setEditTriggers(QAbstractItemView.NoEditTriggers);self.table.setMinimumHeight(180);self.table.setMaximumHeight(260);l.addWidget(self.table)
         w,c=card('Look back at a turn');self.history_box=QComboBox();c.addWidget(self.history_box);row=QHBoxLayout();row.addWidget(button('Replay turn',self.replay));row.addWidget(button('Save a copy',self.export_results));row.addWidget(button('One more round',self.extra_round));row.addWidget(button('We enjoyed this',self.enjoy_game));c.addLayout(row);self.audit=QTextEdit();self.audit.setReadOnly(True);self.audit.setMaximumHeight(100);self.audit.hide();l.addWidget(w)
         w,c=card('Your saved games','Continue where you left off. Your games are saved on this computer.');self.saved_list=QListWidget();self.saved_list.setMinimumHeight(125);self.saved_list.setMaximumHeight(220);self.saved_list.itemDoubleClicked.connect(lambda item:self.load_selected());c.addWidget(self.saved_list);row=QHBoxLayout();row.addWidget(button('Continue selected game',self.load_selected,True));row.addWidget(button('Open another saved file',self.resume));c.addLayout(row);l.addWidget(w);self.sport_notes=self.journal_card();self.sport_notes.hide();l.addWidget(button('Add a sports-day note',lambda:self.sport_notes.setVisible(self.sport_notes.isHidden())));l.addWidget(self.sport_notes);l.addStretch()
     def refresh(self):
         super().refresh()
+        if hasattr(self,'result_metrics'):
+            values=[sum(self.points.get(p,0) for p in self.players if self.players[p]=='A'),sum(self.points.get(p,0) for p in self.players if self.players[p]=='B'),len(self.players)] if self.players else ['—']*3
+            titles=['Team A points','Team B points','Players']
+            if self.players and GAMES.get(getattr(self,'active_game',''),{}).get('mode')=='Individual':values=[max(self.points.values(),default=0),str(self.round)+' / '+str(self.total_rounds),len(self.players)];titles=['Highest score','Round','Players']
+            for widget,title in zip(self.metric_titles,titles):widget.setText(title)
+            for widget,value in zip(self.result_metrics,values):widget.setText(str(value))
         if self.players:
             for i in range(self.history_box.count()):self.history_box.setItemText(i,self.history_box.itemText(i).replace('AI evidence','results'))
     def refresh_saved(self):

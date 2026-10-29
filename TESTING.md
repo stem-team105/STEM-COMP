@@ -1,16 +1,16 @@
 # Lamatna verification
 
-45 automated checks pass in the current revision. Synthetic fixtures check scoring, validation, HMAC signatures, duplicate rejection, explicit local review, turn progression, autosave/resume, game guidance, timer colours, favourites, main Arabic labels, planner/journal persistence, recommendation behaviour, isolated launcher setup/recovery and reuse without network installation. They do not measure gameplay-model accuracy.
+49 automated checks pass in the current revision. Synthetic fixtures check scoring, validation, HMAC signatures, duplicate rejection, explicit local review, turn progression, autosave/resume, game guidance, timer colours, favourites, main Arabic labels, planner/journal persistence, recommendation behaviour, isolated launcher setup/recovery and reuse without network installation. They do not measure gameplay-model accuracy.
 
-The Qt interface was launched offscreen on Linux. Home, teams and results were inspected; plans and notes are collapsed, football leads the home page, and scores lead Results. English/Arabic and light/dark rendering have been inspected. No Windows launcher, desktop-shortcut, camera or microphone pass is claimed from this environment.
+The Qt interface was launched offscreen on Linux. Home, teams and results were inspected; plans and notes are collapsed, football leads the home page, and scores lead Results. English/Arabic and light/dark rendering have been inspected. No Windows launcher, camera or microphone pass is claimed from this environment.
 
 ## Student acceptance checks
 
 | Test | Expected | Actual / status |
 |---|---|---|
-| Extract ZIP, double-click Lamatna.bat | Setup window, interface installation if needed, app opens | Pending on Windows |
+| Extract ZIP, open Open-Lamatna.pyw | Setup window, interface installation if needed, app opens | Pending on Windows |
 | Existing installed app | No repeated package/model download | Automated recovery/reuse logic passed; Windows pending |
-| Desktop shortcut | Lamatna opens from its actual folder, including paths with spaces | Pending on Windows |
+| Python entry point | Opens the neighbouring launcher regardless of current folder | Automated path-resolution check passed; Windows association pending |
 | Settings → Set up offline game support | Missing packages install, model files download, app reopens | Pending on team connection |
 | Camera + microphone recording | Playable clip with audible instructions | Pending |
 | Football: one visible goal | Correct candidate team +1, timestamp and reason, host review required | Pending real model/footage |
@@ -36,3 +36,7 @@ Local vision/speech integrates pretrained models, not models trained by the team
 The host must stop recording; the timer does not automatically cut a clip. Optional cloud review needs the family's own key, internet and quota. Local review needs the one-time package/model installation but no API key afterward. HMAC detects changes relative to one installation's key; it does not prevent forgery by someone who controls that computer/key.
 
 Use real student footage and observed results in the submission. Keep untested rows pending until actually checked.
+
+## Design and direct-Python revision
+
+49 checks pass. The original family football illustration, green/gold feature panel, compact responsive cards, line navigation icons, coloured team counts and real score summary tiles were rendered at 1240×900 and 850×720. Windows acceptance is still pending. Source startup does not invoke PowerShell or batch files and does not alter device security policies.
