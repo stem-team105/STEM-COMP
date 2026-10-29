@@ -29,3 +29,18 @@ Do not replace pending with passed without checking the actual result.
 - Local HMAC prevents accidental/unauthorised editing without the secret, not a malicious machine owner.
 - Match state is not automatically saved. Export before closing.
 - The timer is host guidance; the host must stop recording and obey the game time limit.
+
+## Modern desktop revision
+
+20 automated checks passed, including six offscreen Qt behaviour checks. These do not replace Windows hardware/footage tests.
+
+| Additional acceptance test | Expected | Actual / status |
+|---|---|---|
+| Run Start-Game-Day.bat in fresh extracted folder | Creates venv, installs UI and launches | Pending on Windows |
+| Install-Local-AI.bat | CPU packages + all three pretrained models ready | Pending on team connection |
+| Camera preview and recording | MP4 recording includes microphone audio | Pending |
+| First-frame calibration | Clicks save correct normalized player/goal/marker positions | Pending |
+| Local football inference | Candidate goals/possession shown for review | Pending real model/footage |
+| Local approval | No score until host confirms; human_reviewed recorded | Automated synthetic check passed |
+| Restart and resume | Session scores/history/round restored | Pending Windows user test |
+| Dark/light themes and small window | Readable, scrollable controls | Visually inspected offscreen; Windows pending |

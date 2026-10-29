@@ -5,3 +5,7 @@ __pycache__/
 *.mov
 *.webm
 *.key
+.venv/
+models/
+*.pt
+*.onnx
