@@ -44,3 +44,9 @@ Do not replace pending with passed without checking the actual result.
 | Local approval | No score until host confirms; human_reviewed recorded | Automated synthetic check passed |
 | Restart and resume | Session scores/history/round restored | Pending Windows user test |
 | Dark/light themes and small window | Readable, scrollable controls | Visually inspected offscreen; Windows pending |
+
+## Family-first RALLY revision
+
+28 automated checks passed. New checks cover pre-play guidance, no sidebar/four-tab navigation, favourites persistence, countdown colour changes, local-mode default, saved-match restoration, streaming hashes, efficiency profiles and speech-only execution without a vision-model import.
+
+Light and dark layouts were visually inspected at 1240×900 and 850×720. These are offscreen Qt checks, not Windows hardware tests. Windows camera/audio recording, installer/updater execution, peak RAM and real model accuracy still need acceptance tests on the team's laptop.

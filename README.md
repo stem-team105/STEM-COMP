@@ -1,6 +1,6 @@
-# Family AI Game Day — Team 105
+# RALLY — Team 105
 
-A desktop game host built for the Advanced (Champions) track of the 2026 COE STEM Programming with AI Competition.
+A family-first desktop game host built for the Advanced (Champions) track of the 2026 COE STEM Programming with AI Competition.
 
 ## Start on Windows
 
@@ -19,14 +19,26 @@ VS Code terminal after installation:
 
 The original minimal Tkinter interface remains available as `py legacy_app.py`.
 
+## Everyday family flow
+
+The main interface uses plain family language. It opens on Home with a quick game suggestion, colourful game cards, favourites and game filters. Select a game to see a pre-play suggestion, equipment, safety tip and a blue duration badge. Family names and teams are edited in a simple table. The Play page contains a timer, camera and results review. Moments contains scores, replay and saved games. Settings lives in the top bar.
+
+The sidebar is removed. Four bottom tabs provide tablet-style navigation on a desktop. Light/dark appearance and reduced animation are supported. Timer digits turn amber at 15 seconds and red at five, with text and a progress bar alongside the colour.
+
+Local processing is the default. The family does not select a model or enter a key in the normal flow. Optional cloud controls are hidden under Settings → Advanced connection options. The app asks for a one-time camera-view calibration when a local game requires it. Uncertain local points still require honest host review.
+
+## Updating without repeating setup
+
+Close the app, place `Update-RALLY.bat` in the existing extracted application folder, and run it. It downloads source from this team's public GitHub repository and updates app files while preserving `.venv`, `models/` and `.local/`. Reopen `Start-Game-Day.bat`. The same folder retains your installed dependencies and saved games.
+
 ## Desktop features
 
-- Five-game library, match setup, arena, results/replay, and AI/settings pages.
-- Animated page fades, dark/light themes, scrollable panels, and a fixed sidebar.
+- Game home, family setup, play, moments and settings pages.
+- Animated page fades, dark/light themes, reduced motion, scrollable panels and compact bottom navigation.
 - Team and individual modes, player roster, rounds, timed turns and tie-break rounds.
 - Camera preview and recording **with microphone audio** using Qt Multimedia.
 - Local video upload, playback, external opening and turn replay.
-- Local AI models with a one-time model download and optional Gemini cloud judge.
+- On-device models with a one-time download; optional cloud connection lives in advanced settings.
 - Click-to-calibrate first-frame player positions, goal rectangles, floor markers and delivery zone.
 - Timestamped evidence, transcript and possession intervals with explicit review controls.
 - Rules-based scores, team standings, football team/player possession estimates and joint MVPs for ties.
@@ -50,12 +62,18 @@ Complete rules and tie handling appear in setup. The four extra games are propos
 1. Start with **two players**, one on each team, one round, and a short fixed-camera football recording. Clearly distinguish people, the ball and both goals. Start with all players standing apart.
 2. Set the roster and actual player/goal identification details in Match setup.
 3. Choose a clip or record through the arena. Stop the camera after recording before replaying. The host timer does not automatically stop recording.
-4. In local mode click **Calibrate local AI**. Click each player at their starting position. Mark the top-left and bottom-right of each goal. **Goal A is the goal where team A scores**, not the goal A defends. Goal rectangles must describe the actual goal mouth.
-5. Click **Analyse gameplay**. Local mode proposes candidates; it does not certify goals. Review the video before confirming the checkbox and applying.
+4. In local mode click **Set up camera view** (or follow the prompt when finding results). Click each player at their starting position. Mark the top-left and bottom-right of each goal. **Goal A is the goal where team A scores**, not the goal A defends. Goal rectangles must describe the actual goal mouth.
+5. Click **Find this round’s results**. Local mode proposes candidates; it does not certify goals. Review the video before confirming the checkbox and applying.
 6. Check possession identities, team scores and goal timestamps. If any listed event is false, do not confirm the entire report: improve the camera/calibration, retry, or use cloud judging.
 7. Capture actual test evidence for the competition. Never present synthetic unit-test fixtures as gameplay results.
 
 For Dune Steps, calibrate all three markers. For local Majlis Delivery, use a **soft sports ball** so the pretrained object class is detectable, and mark the delivery zone. Falcon Freeze requires audible English MOVE/FREEZE cues. Story Relay requires clear English speech from the active player. Record the participant's actual play and avoid setup speech inside the gameplay clip.
+
+## Efficiency profiles
+
+Settings offers Eco (2 sampled frames/second at 384-pixel inference size, up to two CPU threads), Balanced (4 at 512, up to four threads) and Detail (6 at 640, up to four threads). Balanced is the default. Lower processing can miss fast or small events; no profile guarantees accuracy.
+
+The application does not load a neural model just to browse games. Speech-only turns avoid importing PyTorch. Speech runs before vision on freeze turns rather than holding both models together. Video frames are decoded sequentially and file hashes are streamed instead of loading entire recordings into memory. One nano vision model is referenced per task and released afterward. Libraries/allocators can retain memory; **peak RAM has not been benchmarked on the team's laptop**. These changes reduce unnecessary work but do not promise a fixed memory ceiling.
 
 ## Local AI implementation and limitations
 
@@ -73,7 +91,7 @@ This prototype does not claim fully autonomous or production-grade sports refere
 
 ## Optional cloud mode
 
-Enter your own Gemini API key in AI/settings, then select Cloud AI in Match setup. The key stays in memory. No key is needed in local mode. Never commit or send credentials in chat.
+Enter your own Gemini API key and choose the cloud connection under Settings → Advanced connection options before starting a new match. The key stays in memory. No key is needed in local mode. Never commit or send credentials in chat.
 
 Cloud mode sends the complete selected clip to Google only when Analyse is clicked and needs internet, API permissions, quota and a supported video model. The model name is editable (default `gemini-3.8-flash`). Cloud clips must be MP4, WebM or MOV, up to 14 MB. Both modes limit clips to five minutes. Cloud failures leave scores unchanged.
 
@@ -95,15 +113,21 @@ Obtain participants' permission before recording. Local mode does not intentiona
 .\.venv\Scripts\python.exe -m unittest -v
 ```
 
-20 automated checks pass at this revision: core scoring/validation/signatures and offscreen Qt checks for match setup, scoring, turn advancement, autosave, duplicate rejection and local review gating. Test fixtures are explicitly synthetic; cloud transport is mocked.
+28 automated checks pass at this revision: core scoring/validation/signatures and offscreen Qt checks for match setup, scoring, turn advancement, autosave, duplicate rejection, local review gating, favourites, pre-play guidance, timer colours, saved-match restoration, efficient hashing and speech-only execution without a vision import. Test fixtures are explicitly synthetic; cloud transport is mocked.
 
-The Qt interface was launched and visually inspected in a Linux offscreen environment. **Windows camera/microphone recording, real model inference on footage, model download on the team's connection, and real AI judging accuracy still need student acceptance testing.** Use `TESTING.md` to record actual expected/observed results. No camera or real-game accuracy pass is claimed.
+The Qt interface was launched and visually inspected in a Linux offscreen environment at 1240×900 and 850×720, in light and dark modes. **Windows camera/microphone recording, real model inference on footage, model download on the team's connection, and real AI judging accuracy still need student acceptance testing.** Use `TESTING.md` to record actual expected/observed results. No camera or real-game accuracy pass is claimed.
 
 ## Submission
 
 Share a Google Drive/OneDrive project folder allowing signed-out viewing and downloading, with source and this README. GitHub is an additional source link. Include dependencies/setup instructions. For an offline evaluation package, include downloaded `models/` separately if permitted by their licences; do not include `.venv`, API keys, `.local` signing keys or private recordings. Public source alone requires first-run package/model downloads.
 
 Submit separate PDFs: exactly 30 presentation slides, six report pages, and all AI conversations; each PDF ≤10 MB. Use real verified results. The demo video must show students using/testing the app and AI. Target confirmed submission by **5:45 PM UAE, 29 October 2026**.
+
+## Source layout
+
+`app.py` launches RALLY; `studio.py` builds the family-facing experience; `ui_kit.py` holds shared appearance and vector game illustrations; `session_ui.py` retains the validated match/evidence engine and the earlier interface. `local_ai.py` runs local observation pipelines; `judge.py` handles the optional cloud connection; `core.py` defines game rules, validation and signatures. `assets/` contains the approved vector RALLY identity from Figma.
+
+Editable design: https://www.figma.com/design/0Ed17nTtib8RkYoWlJoqYO?node-id=7-22
 
 ## Licensing
 

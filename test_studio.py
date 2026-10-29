@@ -17,7 +17,7 @@ class StudioTests(unittest.TestCase):
     def setUpClass(cls): cls.app=QApplication.instance() or QApplication([])
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.patcher=patch.object(studio,'DATA',Path(self.tmp.name));self.patcher.start()
-        self.w=studio.Studio();self.messages=[];self.w.error=self.messages.append;self.w.start_match()
+        self.w=studio.Studio();self.messages=[];self.w.error=self.messages.append;self.w.rounds.setValue(2);self.w.start_match()
     def tearDown(self):self.w.close();self.patcher.stop();self.tmp.cleanup()
     def report(self,local=False):
         return {'game':'Football','status':'uncertain' if local else 'ok','duration_seconds':20,'summary':'SYNTHETIC GUI TEST', 'limitations':['Not real gameplay.'],'events':[{'kind':'goal','player':'P1','time':5,'confidence':.9,'evidence':'Synthetic fixture only.'}], 'possession':[],'video_sha256':'testhash','roster':dict(self.w.players),'turn_player':'P1','host_context':self.w.host_context,'review_required':local}
@@ -37,5 +37,17 @@ class StudioTests(unittest.TestCase):
         self.w.game.setCurrentText('Dune Steps');self.w.start_match();self.w.advance();self.assertEqual(self.w.current_player(),'P2');self.assertEqual(self.w.round,1)
     def test_cloud_uncertain_blocked(self):
         r=self.report();r['status']='uncertain';self.w.receive_report(sign(r,self.w.secret));self.assertFalse(self.w.apply_button.isEnabled());self.w.apply_report();self.assertEqual(self.w.points['P1'],0)
+
+    def test_preplay_tip_and_no_sidebar(self):
+        self.w.select_game('Falcon Freeze');self.assertEqual(self.w.stack.currentIndex(),1);self.assertIn('no equipment',self.w.tip.text());self.assertEqual(len(self.w.nav),4)
+    def test_favourites_persist(self):
+        self.w.favourite('Dune Steps');self.w.filter_games('Favourites');self.assertIn('Dune Steps',self.w.favourites)
+        import json
+        saved=json.loads((Path(self.tmp.name)/'preferences.json').read_text());self.assertIn('Dune Steps',saved['favourites'])
+    def test_timer_colours_change(self):
+        self.w.remaining=30;self.w.show_clock();blue=self.w.clock.styleSheet();self.w.remaining=4;self.w.show_clock();self.assertNotEqual(blue,self.w.clock.styleSheet());self.assertEqual(self.w.clock.text(),'00:04')
+    def test_offline_is_default(self):self.assertEqual(self.w.engine.currentIndex(),0);self.assertTrue(self.w.advanced_settings.isHidden())
+    def test_saved_match_restores(self):
+        self.w.receive_report(sign(self.report(),self.w.secret));self.w.apply_report();path=next((Path(self.tmp.name)/'sessions').glob('*.json'));self.w.points['P1']=8;self.w.players={};self.w.restore_session(str(path));self.assertEqual(self.w.points['P1'],1);self.assertEqual(self.w.round,2)
 
 if __name__=='__main__':unittest.main()

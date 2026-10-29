@@ -2,9 +2,16 @@
 import hashlib
 import json
 import math
+import gc
+import os
 from pathlib import Path
 
 MODEL_DIR=Path(__file__).resolve().parent/'models'
+PROFILES={'eco':(2,384,2),'balanced':(4,512,4),'detail':(6,640,4)}
+
+def video_digest(path):
+    # Hash in chunks rather than loading an entire video into RAM.
+    with open(path,'rb') as source:return hashlib.file_digest(source,'sha256').hexdigest()
 
 def download_models(progress=lambda x:None):
     """Explicit first-run download; subsequent inference is offline."""
@@ -36,7 +43,7 @@ def transcribe(path):
     if not model_path.exists(): raise ValueError('Download models in Settings first.')
     with tempfile.TemporaryDirectory() as tmp:
         wav=Path(tmp)/'audio.wav'
-        proc=subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-y','-i',str(path),'-t','300','-vn','-ar','16000','-ac','1',str(wav)],capture_output=True)
+        proc=subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-y','-i',str(path),'-t','30','-vn','-ar','16000','-ac','1',str(wav)],capture_output=True)
         if proc.returncode: raise ValueError('No readable audio track. Record with microphone enabled.')
         rec=KaldiRecognizer(Model(str(model_path)),16000); rec.SetWords(True); words=[]
         with wave.open(str(wav),'rb') as source:
@@ -49,10 +56,8 @@ def distance(a,b): return math.hypot(a[0]-b[0],a[1]-b[1])
 def inside(p,rect):
     return bool(rect and rect[0]<=p[0]<=rect[2] and rect[1]<=p[1]<=rect[3])
 
-def analyze_local(path,game,players,turn_player,context,calibration,progress=lambda value:None):
+def analyze_local(path,game,players,turn_player,context,calibration,progress=lambda value:None,profile='balanced'):
     import cv2
-    import numpy as np
-    from ultralytics import YOLO
     path=Path(path); cap=cv2.VideoCapture(str(path))
     fps=cap.get(cv2.CAP_PROP_FPS); total=int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if not cap.isOpened() or fps<=0 or total<=0: raise ValueError('Cannot decode this video. Use an MP4 recording.')
@@ -60,7 +65,7 @@ def analyze_local(path,game,players,turn_player,context,calibration,progress=lam
     if total/fps>300: raise ValueError('Use a clip no longer than five minutes.')
     report={'game':game,'status':'uncertain','duration_seconds':duration,'summary':'Local observations require host review.','events':[],'possession':[],
       'limitations':['Pretrained models plus experimental rules; fixed camera required. Host must review every proposed event. No custom model training or accuracy claim.'],
-      'video_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'model':'YOLO11n / Vosk offline','roster':players,'turn_player':turn_player,'host_context':context,'calibration':calibration,'review_required':True}
+      'video_sha256':video_digest(path),'model':'YOLO11n / Vosk offline','roster':players,'turn_player':turn_player,'host_context':context,'calibration':calibration,'review_required':True}
     def event(kind,t,evidence,confidence=.80,player=None):
         report['events'].append({'kind':kind,'player':player or turn_player,'time':round(t,2),'confidence':confidence,'evidence':evidence})
     words=[]
@@ -80,7 +85,8 @@ def analyze_local(path,game,players,turn_player,context,calibration,progress=lam
     pose=game in ['Falcon Freeze','Dune Steps']
     name='yolo11n-pose.pt' if pose else 'yolo11n.pt'
     if not (MODEL_DIR/name).exists(): raise ValueError('Download local models in Settings first.')
-    model=YOLO(str(MODEL_DIR/name)); cap=cv2.VideoCapture(str(path)); stride=max(1,int(fps/6)); previous={}; tracks={}; samples=[]; observations=[]; last_ball=None; last_owner=None; zone_lock=None; last_event=-10; target_index=0; last_marker=None
+    sample_fps,image_size,threads=PROFILES.get(profile,PROFILES['balanced'])
+    stride=max(1,int(fps/sample_fps)); tracks={}; samples=[]; observations=[]; last_ball=None; last_owner=None; zone_lock=None; last_event=-10; target_index=0; last_marker=None
     seeds=calibration.get('players',{})
     if game=='Football' and set(seeds)!=set(players): raise ValueError('Calibrate each player’s starting position before local football analysis. All players must be visible at the beginning.')
     for p,xy in seeds.items(): tracks[p]=tuple(xy)
@@ -89,12 +95,25 @@ def analyze_local(path,game,players,turn_player,context,calibration,progress=lam
     if game=='Dune Steps' and len(calibration.get('markers',{}))!=3: raise ValueError('Calibrate all three floor markers first.')
     if game=='Majlis Delivery' and 'delivery' not in calibration: raise ValueError('Calibrate the delivery target rectangle first.')
     max_time=duration if game=='Football' else min(duration,30)
+    # Speech-only turns never import PyTorch. Vision loads a single nano model.
+    from ultralytics import YOLO
+    import numpy as np
+    import torch
+    torch.set_num_threads(min(threads,os.cpu_count() or 1))
+    model=YOLO(str(MODEL_DIR/name));cap=cv2.VideoCapture(str(path));decoded=-1
+    report['performance_profile']=profile
     try:
         for frame_no in range(0,int(max_time*fps),stride):
-            cap.set(cv2.CAP_PROP_POS_FRAMES,frame_no); ok,frame=cap.read()
-            if not ok: break
+            # Decode sequentially, avoiding repeated expensive seeks into compressed video.
+            ok=True
+            while decoded<frame_no:
+                ok=cap.grab();decoded+=1
+                if not ok:break
+            if not ok:break
+            ok,frame=cap.retrieve()
+            if not ok:break
             t=frame_no/fps; h,w=frame.shape[:2]
-            result=model.predict(frame,conf=.25,imgsz=640,verbose=False,device='cpu')[0]
+            result=model.predict(frame,conf=.25,imgsz=image_size,max_det=20,verbose=False,device='cpu')[0]
             detections=[]; balls=[]
             for i,box in enumerate(result.boxes):
                 cls=int(box.cls[0]); x1,y1,x2,y2=(box.xyxy[0].cpu().numpy()/np.array([w,h,w,h])).tolist()
@@ -149,17 +168,18 @@ def analyze_local(path,game,players,turn_player,context,calibration,progress=lam
                 if result.keypoints is not None:
                     points=result.keypoints.data[i].cpu().numpy(); observations.append((t,[(float(x/w),float(y/h),float(c)) for x,y,c in points]))
             progress(min(95,int(10+85*t/max_time)))
-    finally: cap.release()
+    finally:
+        cap.release();model=None;gc.collect()
     if game=='Falcon Freeze':
         for cue in [x for x in words if x['word']=='freeze' and x['end']+3<=max_time]:
             window=[v for t,v in observations if cue['end']+.3<=t<=cue['end']+3]
-            if len(window)<8: continue
+            if len(window)<max(3,int(2.0*fps/stride)): continue
             motion=[]
             for a,b in zip(window,window[1:]):
                 ds=[distance(x[:2],y[:2]) for x,y in zip(a,b) if x[2]>.5 and y[2]>.5]
                 if ds: motion.append(float(np.median(ds)))
             if motion:
-                moved=max(motion)>.025; event('freeze_movement' if moved else 'freeze_success',cue['end']+3,'Audio FREEZE cue followed by pose displacement '+str(round(max(motion),4))+'. Host checks camera stability and body movement.')
+                moved=max(motion)>(.025*stride/fps*6); event('freeze_movement' if moved else 'freeze_success',cue['end']+3,'Audio FREEZE cue followed by pose displacement '+str(round(max(motion),4))+'. Host checks camera stability and body movement.')
     # Merge consecutive possession observations from the same estimated identity.
     for s in samples:
         if report['possession'] and report['possession'][-1]['player']==s['player'] and abs(report['possession'][-1]['end']-s['start'])<.003: report['possession'][-1]['end']=s['end']
